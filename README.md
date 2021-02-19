@@ -1,7 +1,13 @@
 # CS6650-Distributed-Systems
+
 The Client design can be divide into two parts — Client.java (main class) and PoolExecutor.java. The main program is responsible for accepting user input in the command line. The interaction-based input instructions will communicate with the user and define their expected parameters one by one. The program also allowed users to use the default value and skipped the parameter input process. When the user entering some incredible value (unformatted port number, wrong number, etc.), the program will generate a hint and allow the user to reenter their pre-designed parameters without terminating the program. 
+
 Once all required parameters are set (maxStore number, customer ids, number of purchases per hour, item in each purchase, etc.). The system will move into the next stage, create a separate thread pool for the EAST, MID, and WEST region and assign post requests based on the given swagger client jar one by one. The system will establish three fixed number thread pools, and EAST region one starts first. In the EAST region thread pool, maxStore/4 threads will be created. Each thread will use a swagger client to send a POST request to the server. Note that when sending the POST request, the ApiClient will be created, its body, and BASE_PATH will be modified given to the user input and server address. The response code will be recorded (we expect a 100% success rate, while the response code should be 200/201).
+
 During this stage, atomic integers will be used to record the total request send, successful rate, and other concurrent information. When total request exceeded maxStore / 4 * 3 * number of purchase per hour, which indicate the EAST region is operating for 3 hours, the MID region thread pool will be executed. Similarly, when total request exceeded maxStore / 4 * (5 + 2) * the number of purchase per hour, which indicate the EAST region is operating for 5 hours and MID region is running for 2 hours, WEST region thread pool will be executed. 
+
 The Thread pool will be properly shut down after all threads finish and terminate. The wall time and throughput will be calculated and print accordingly.
+
 Client part II is very similar to the part I, while the only difference is we record the latency for each POST request in every thread. We then offer that information into a blocking queue, and after all thread pool terminated, an output excels file are generated according to the requirement for later analysis.
+
 The server and client are deployed into AWS EC2, separated in two different instances in the same region to simulate the real-world data transmission process. 
